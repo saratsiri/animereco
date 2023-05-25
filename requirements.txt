@@ -1,0 +1,11 @@
+numpy
+pandas == 1.4.4
+scipy
+matplotlib
+scikit-learn
+plotly
+jupyter
+seaborn
+statsmodels
+scikit-surprise
+streamlit
