@@ -2,25 +2,25 @@ import streamlit as st
 import pandas as pd
 import pickle
 from google.cloud import storage
+from io import StringIO
 
 # Instantiate a Google Cloud Storage client
 storage_client = storage.Client()
 
-# Define a function to load a CSV file from Google Cloud Storage into a pandas dataframe
+@st.cache_data  # Use st.cache_data for data-like objects
 def load_csv_from_gcs(bucket_name, blob_name):
     bucket = storage_client.get_bucket(bucket_name)
     blob = bucket.blob(blob_name)
     s = blob.download_as_text()
     return pd.read_csv(StringIO(s))
 
-# Define a function to load a pickle file from Google Cloud Storage
+@st.cache_resource  # Use st.cache_resource for resource-like objects
 def load_pickle_from_gcs(bucket_name, blob_name):
     bucket = storage_client.get_bucket(bucket_name)
     blob = bucket.blob(blob_name)
     s = blob.download_as_bytes()
     return pickle.loads(s)
 
-# Load the data and models from Google Cloud Storage
 bucket_name = "anime-reco"
 
 AnimesDF = load_csv_from_gcs(bucket_name, "anime_cleaned.csv")
