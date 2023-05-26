@@ -96,5 +96,8 @@ You can click on the title of any anime in the recommendations to go to its webp
 
 anime_title = st.text_input('Please enter an anime title')
 
-if anime_title:
+# Check if the input is empty or consists of only spaces
+if not anime_title or anime_title.isspace():
+    st.write("Enter something you neckbeard! There's no empty anime name.")
+else:
     get_item_recommendations(loaded_model, loaded_knn_model, anime_title)
