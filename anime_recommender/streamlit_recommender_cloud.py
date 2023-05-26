@@ -3,20 +3,17 @@ import pandas as pd
 import pickle
 from google.cloud import storage
 from io import StringIO
-import os
 import json
+from google.oauth2.service_account import Credentials
 
-# Write the secrets to a file
-creds_json = st.secrets["GOOGLE_APPLICATION_CREDENTIALS_JSON"]
-creds_path = "google-creds.json"
-with open(creds_path, "w") as f:
-    f.write(creds_json)
+# Parse the secrets to a dictionary
+creds_dict = json.loads(st.secrets["GOOGLE_APPLICATION_CREDENTIALS_JSON"])
 
-# Point to the service account key file
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = creds_path
+# Create a Credentials object from the dictionary
+creds = Credentials.from_service_account_info(creds_dict)
 
-# Instantiate a Google Cloud Storage client
-storage_client = storage.Client()
+# Instantiate a Google Cloud Storage client with the credentials
+storage_client = storage.Client(credentials=creds)
 
 @st.cache_data  # Use st.cache_data for data-like objects
 def load_csv_from_gcs(bucket_name, blob_name):
