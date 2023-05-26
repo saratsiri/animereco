@@ -9,8 +9,4 @@ seaborn
 statsmodels
 scikit-surprise
 streamlit
-<<<<<<< HEAD
 google-cloud-storage
-=======
-google.cloud
->>>>>>> ad5703f08e0b0908cae713f97741f19679d4c9a8
