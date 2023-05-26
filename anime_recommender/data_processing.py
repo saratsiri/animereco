@@ -16,7 +16,7 @@ upper_rating = ScoresDF['my_score'].max()
 #Counting how many relevant scores each user have done, resetting the index (so the series could become a DF again) and changing the column names
 UsersAndScores = ScoresDF['username'].value_counts().reset_index().rename(columns={"username": "animes_rated", "index": "username"})
 
-UsersSampled = UsersDF.sample(frac = 1) #, random_state = 2)
+UsersSampled = UsersDF.sample(frac = 0.1)
 
 UsersAndScoresSampled = pd.merge(UsersAndScores, UsersSampled, left_on = 'username', right_on = 'username', how = 'inner')
 
@@ -29,13 +29,13 @@ RatedsPerAnime = ScoresDF['anime_id'].value_counts().reset_index().rename(column
 #Grouping users whom had the same amount of animes rated
 AnimeRatedsAggregated = RatedsPerAnime['number_of_users'].value_counts().reset_index().rename(columns={"number_of_users": "group_size", "index": "number_of_users"}).sort_values(by=['number_of_users'])
 #Creating a dataframe of users  and animes with more than 10 interactions
-UserRatedsCutten = UsersAndScoresSampled[UsersAndScoresSampled['animes_rated'] >= 10]
-AnimeRatedsCutten = RatedsPerAnime[RatedsPerAnime['number_of_users'] >= 10]
+UserRatedsCutten = UsersAndScoresSampled[UsersAndScoresSampled['animes_rated'] >= 20]
+AnimeRatedsCutten = RatedsPerAnime[RatedsPerAnime['number_of_users'] >= 20]
 #Joining (merging) our new dataframes with the interactions one (this will already deal with the sample problem,
 #as it is an inner join). The "HotStart" name comes from a pun about solving the "Cold Start" issue
 ScoresDFHotStart = pd.merge(ScoresDF, UserRatedsCutten, left_on = 'username', right_on = 'username', how = 'inner')
 ScoresDFHotStart = pd.merge(ScoresDFHotStart, AnimeRatedsCutten, left_on = 'anime_id', right_on = 'anime_id', how = 'inner')
 
 # Save ScoresDFHotStart to a CSV file
-ScoresDFHotStart.to_csv(f"{os.getcwd()}/processed_data/ScoresDFHotStart", index = False)
+ScoresDFHotStart.to_csv(f"{os.getcwd()}/processed_data/ScoresDFHotStart-small", index = False)
 print("Data processing completed.")
