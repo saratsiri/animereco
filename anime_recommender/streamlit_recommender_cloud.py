@@ -38,16 +38,24 @@ loaded_knn_model = load_pickle_from_gcs(bucket_name, "knn_model.pickle")
 def get_item_recommendations(algo, algo_items, anime_title, anime_id=100000, k=10):
     anime_title = anime_title.strip().lower()
 
-    # First, try to find an exact match
-    matching_animes = AnimesDF[(AnimesDF['title'].str.lower() == anime_title) | (AnimesDF['title_english'].str.lower() == anime_title)]
+    # Split input into words
+    input_words = set(anime_title.split())
 
-    # If no exact match is found, try to find a partial match
+    # Check if any word from the input is in the title
+    matching_animes = AnimesDF[AnimesDF['title'].str.lower().apply(lambda x: any(word in x.split() for word in input_words))]
+
+    # If no results, search by the English title
     if matching_animes.empty:
-        matching_animes = AnimesDF[(AnimesDF['title'].str.lower().str.contains(anime_title)) | (AnimesDF['title_english'].str.lower().str.contains(anime_title))]
+        matching_animes = AnimesDF[AnimesDF['title_english'].str.lower().apply(lambda x: any(word in x.split() for word in input_words))]
 
     if matching_animes.empty:
         st.write("No matching anime found. Please check your input.")
         return
+
+    # If there are multiple matches, select the best one
+    if len(matching_animes) > 1:
+        st.write("Assuming you meant: ", matching_animes.iloc[0]['title'])
+        anime_id = matching_animes.iloc[0]['anime_id']
     else:
         anime_id = matching_animes['anime_id'].iloc[0]
 
