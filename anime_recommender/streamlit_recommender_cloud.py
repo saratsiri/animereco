@@ -3,6 +3,17 @@ import pandas as pd
 import pickle
 from google.cloud import storage
 from io import StringIO
+import os
+import json
+
+# Write the secrets to a file
+creds_json = st.secrets["GOOGLE_APPLICATION_CREDENTIALS_JSON"]
+creds_path = "google-creds.json"
+with open(creds_path, "w") as f:
+    f.write(creds_json)
+
+# Point to the service account key file
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = creds_path
 
 # Instantiate a Google Cloud Storage client
 storage_client = storage.Client()
