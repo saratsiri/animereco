@@ -9,3 +9,4 @@ seaborn
 statsmodels
 scikit-surprise
 streamlit
+google-cloud-storage
