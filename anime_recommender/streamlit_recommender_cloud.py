@@ -5,6 +5,7 @@ from google.cloud import storage
 from io import StringIO
 import json
 from google.oauth2.service_account import Credentials
+import re
 
 # Parse the secrets to a dictionary
 creds_dict = json.loads(st.secrets["GOOGLE_APPLICATION_CREDENTIALS_JSON"])
@@ -35,18 +36,19 @@ AnimesDF = load_csv_from_gcs(bucket_name, "anime_cleaned.csv")
 loaded_model = load_pickle_from_gcs(bucket_name, "baseline_model.pickle")
 loaded_knn_model = load_pickle_from_gcs(bucket_name, "knn_model.pickle")
 
-def get_item_recommendations(algo, algo_items, anime_title, anime_id=100000, k=10):
+def get_item_recommendations(algo, algo_items, anime_title, anime_id=100000, k=20):
     anime_title = anime_title.strip().lower()
 
-    # Split input into words
-    input_words = set(anime_title.split())
+    # Create regex pattern
+    pattern = '.*'.join(anime_title)  # Converts 'slamdunk' to 's.*l.*a.*m.*d.*u.*n.*k'
+    regex = re.compile(pattern)  # Compiles a regex pattern which can match any characters between the letters of 'slamdunk'
 
-    # Check if any word from the input is in the title
-    matching_animes = AnimesDF[AnimesDF['title'].str.lower().apply(lambda x: any(word in x.split() for word in input_words))]
+    # Check if the regex pattern is in the title
+    matching_animes = AnimesDF[AnimesDF['title'].str.lower().apply(lambda x: bool(regex.search(x)))]
 
     # If no results, search by the English title
     if matching_animes.empty:
-        matching_animes = AnimesDF[AnimesDF['title_english'].str.lower().apply(lambda x: any(word in x.split() for word in input_words))]
+        matching_animes = AnimesDF[AnimesDF['title_english'].str.lower().apply(lambda x: bool(regex.search(x)))]
 
     if matching_animes.empty:
         st.write("No matching anime found. Please check your input.")
@@ -58,6 +60,7 @@ def get_item_recommendations(algo, algo_items, anime_title, anime_id=100000, k=1
         anime_id = matching_animes.iloc[0]['anime_id']
     else:
         anime_id = matching_animes['anime_id'].iloc[0]
+
 
     iid = algo_items.trainset.to_inner_iid(anime_id)
     neighbors = algo_items.get_neighbors(iid, k=k)
