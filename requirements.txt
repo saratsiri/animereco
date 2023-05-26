@@ -9,4 +9,6 @@ seaborn
 statsmodels
 scikit-surprise
 streamlit
+pickle5
 google-cloud-storage
+google-auth
