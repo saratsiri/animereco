@@ -36,51 +36,55 @@ AnimesDF = load_csv_from_gcs(bucket_name, "anime_cleaned.csv")
 loaded_model = load_pickle_from_gcs(bucket_name, "baseline_model.pickle")
 loaded_knn_model = load_pickle_from_gcs(bucket_name, "knn_model.pickle")
 
+import re
+
 def get_item_recommendations(algo, algo_items, anime_title, anime_id=100000, k=20):
-    anime_title = anime_title.strip().lower()
+    try:
+        anime_title = anime_title.strip().lower()
 
-    # Create regex pattern
-    pattern = '.*'.join(anime_title)  # Converts 'slamdunk' to 's.*l.*a.*m.*d.*u.*n.*k'
-    regex = re.compile(pattern)  # Compiles a regex pattern which can match any characters between the letters of 'slamdunk'
+        # Create regex pattern
+        pattern = '.*'.join(anime_title)  # Converts 'slamdunk' to 's.*l.*a.*m.*d.*u.*n.*k'
+        regex = re.compile(pattern)  # Compiles a regex pattern which can match any characters between the letters of 'slamdunk'
 
-    # Check if the regex pattern is in the title
-    matching_animes = AnimesDF[AnimesDF['title'].str.lower().apply(lambda x: bool(regex.search(x)))]
+        # Check if the regex pattern is in the title
+        matching_animes = AnimesDF[AnimesDF['title'].str.lower().apply(lambda x: bool(regex.search(x)))]
 
-    # If no results, search by the English title
-    if matching_animes.empty:
-        matching_animes = AnimesDF[AnimesDF['title_english'].str.lower().apply(lambda x: bool(regex.search(x)))]
+        # If no results, search by the English title
+        if matching_animes.empty:
+            matching_animes = AnimesDF[AnimesDF['title_english'].str.lower().apply(lambda x: bool(regex.search(x)))]
 
-    if matching_animes.empty:
-        st.write("No matching anime found. Please check your input.")
-        return
+        if matching_animes.empty:
+            st.write("No matching anime found. Please check your input.")
+            return
 
-    # If there are multiple matches, select the best one
-    if len(matching_animes) > 1:
-        st.write("Assuming you meant: ", matching_animes.iloc[0]['title'])
-        anime_id = matching_animes.iloc[0]['anime_id']
-    else:
-        anime_id = matching_animes['anime_id'].iloc[0]
+        # If there are multiple matches, select the best one
+        if len(matching_animes) > 1:
+            st.write("Assuming you meant: ", matching_animes.iloc[0]['title'])
+            anime_id = matching_animes.iloc[0]['anime_id']
+        else:
+            anime_id = matching_animes['anime_id'].iloc[0]
 
+        iid = algo_items.trainset.to_inner_iid(anime_id)
+        neighbors = algo_items.get_neighbors(iid, k=k)
+        raw_neighbors = (algo.trainset.to_raw_iid(inner_id) for inner_id in neighbors)
 
-    iid = algo_items.trainset.to_inner_iid(anime_id)
-    neighbors = algo_items.get_neighbors(iid, k=k)
-    raw_neighbors = (algo.trainset.to_raw_iid(inner_id) for inner_id in neighbors)
+        df = pd.DataFrame(raw_neighbors, columns = ['Anime_ID'])
+        df = pd.merge(df, AnimesDF, left_on = 'Anime_ID', right_on = 'anime_id', how = 'left')
 
-    df = pd.DataFrame(raw_neighbors, columns = ['Anime_ID'])
-    df = pd.merge(df, AnimesDF, left_on = 'Anime_ID', right_on = 'anime_id', how = 'left')
+        df["Title"] = df.apply(lambda row: f"[{row['title']}](https://myanimelist.net/anime/{row['Anime_ID']}/{row['title'].replace(' ', '_')})", axis=1)
+        df["Genre"] = df["genre"]
+        df["Score"] = df["score"]
 
-    df["Title"] = df.apply(lambda row: f"[{row['title']}](https://myanimelist.net/anime/{row['Anime_ID']}/{row['title'].replace(' ', '_')})", axis=1)
-    df["Genre"] = df["genre"]
-    df["Score"] = df["score"]
+        # Create markdown tables
+        table_md = "| Title | Genre | Score |\n| --- | --- | --- |\n"
+        for i, row in df[:10].iterrows():
+            table_md += f"| {row['Title']} | {row['Genre']} | {row['Score']} |\n"
 
-    # Create markdown tables
-    table_md = "| Title | Genre | Score |\n| --- | --- | --- |\n"
-    for i, row in df[:10].iterrows():
-        table_md += f"| {row['Title']} | {row['Genre']} | {row['Score']} |\n"
+        st.markdown("## Top Recommendations")
+        st.markdown(table_md)
 
-    st.markdown("## Top Recommendations")
-    st.markdown(table_md)
-
+    except Exception as e:
+        st.write("Stop trying to debug this code, NECKBEARD!")
 
 # Set up the Streamlit interface
 st.title('Weeaboo Wonderland')
