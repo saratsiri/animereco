@@ -37,28 +37,49 @@ loaded_knn_model = load_pickle_from_gcs(bucket_name, "knn_model.pickle")
 
 def get_item_recommendations(algo, algo_items, anime_title, anime_id=100000, k=10):
     anime_title = anime_title.strip().lower()
-    matching_animes = AnimesDF[AnimesDF['title'].str.lower() == anime_title]
+
+    # First, try to find an exact match
+    matching_animes = AnimesDF[(AnimesDF['title'].str.lower() == anime_title) | (AnimesDF['title_english'].str.lower() == anime_title)]
+
+    # If no exact match is found, try to find a partial match
+    if matching_animes.empty:
+        matching_animes = AnimesDF[(AnimesDF['title'].str.lower().str.contains(anime_title)) | (AnimesDF['title_english'].str.lower().str.contains(anime_title))]
 
     if matching_animes.empty:
         st.write("No matching anime found. Please check your input.")
         return
-
-    if anime_id == 100000:
+    else:
         anime_id = matching_animes['anime_id'].iloc[0]
 
     iid = algo_items.trainset.to_inner_iid(anime_id)
     neighbors = algo_items.get_neighbors(iid, k=k)
     raw_neighbors = (algo.trainset.to_raw_iid(inner_id) for inner_id in neighbors)
-    st.write("Here's a list of anime titles you might enjoy")
+
     df = pd.DataFrame(raw_neighbors, columns = ['Anime_ID'])
     df = pd.merge(df, AnimesDF, left_on = 'Anime_ID', right_on = 'anime_id', how = 'left')
-    return df[['Anime_ID', 'title', 'genre']]
+
+    df["Title"] = df.apply(lambda row: f"[{row['title']}](https://myanimelist.net/anime/{row['Anime_ID']}/{row['title'].replace(' ', '_')})", axis=1)
+    df["Genre"] = df["genre"]
+    df["Score"] = df["score"]
+
+    # Create markdown tables
+    table_md = "| Title | Genre | Score |\n| --- | --- | --- |\n"
+    for i, row in df[:10].iterrows():
+        table_md += f"| {row['Title']} | {row['Genre']} | {row['Score']} |\n"
+
+    st.markdown("## Top Recommendations")
+    st.markdown(table_md)
+
 
 # Set up the Streamlit interface
-st.title('Anime Recommendation System')
+st.title('Weeaboo Wonderland')
+st.write("""
+Please enter an anime title in the input box below and hit 'Enter' on your keyboard.
+You'll be presented with a list of recommended anime based on your input.
+You can click on the title of any anime in the recommendations to go to its webpage.
+""")
 
 anime_title = st.text_input('Please enter an anime title')
 
-if st.button('Get recommendations'):
-    recommendations = get_item_recommendations(loaded_model, loaded_knn_model, anime_title)
-    st.write(recommendations)
+if anime_title:
+    get_item_recommendations(loaded_model, loaded_knn_model, anime_title)
