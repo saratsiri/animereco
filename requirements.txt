@@ -12,3 +12,5 @@ streamlit
 pickle5
 google-cloud-storage
 google-auth
+gcsfs
+git+https://github.com/streamlit/files-connection
