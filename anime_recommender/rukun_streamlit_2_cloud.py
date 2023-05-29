@@ -30,10 +30,10 @@ similarity_matrix = load('scores.npy')
 # animeID_to_name = load_anime()
 # ScoresDF_selected = load_score()
 
-url_2 = "https://drive.google.com/u/0/uc?id=1WpzKNboC-32uDsNSug99cY0j8VLS4Q2I&export=download"
-output_2 = "ScoresDF_selected.csv"
+url_2 = "https://drive.google.com/u/0/uc?id=1iGoI7i-YIf_5CHPYjkuks-F3kmTwrmDn&export=download"
+output_2 = "ScoresDF_selected_Hatui.csv"
 gdown.download(url_2, output_2, quiet=False)
-ScoresDF_selected = pd.read_csv('ScoresDF_selected.csv')
+ScoresDF_selected = pd.read_csv('ScoresDF_selected_Hatui.csv')
 
 
 url_3 = "https://drive.google.com/u/0/uc?id=1cq_0KRmQzb2bnOr9yVG019DETOUimA88&export=download"
