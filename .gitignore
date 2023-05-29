@@ -5,6 +5,7 @@ processed_data/
 .python-version
 .DS_Store
 .pickle
+.streamlit
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
