@@ -42,7 +42,7 @@ gdown.download(url_3, output_3, quiet=False)
 AnimesDF = pd.read_csv('anime_cleaned.csv')
 animeID_to_name = AnimesDF.set_index('anime_id')['title'].to_dict()
 
-@st.cache_data
+#@st.cache_data
 def load_trainset():
     reader = Reader(rating_scale=(0, 10))
     scoredata = Dataset.load_from_df(ScoresDF_selected[['username', 'anime_id', 'my_score']], reader)
