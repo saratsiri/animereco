@@ -17,7 +17,7 @@ def get_item_recommendations(algo, algo_items, anime_title, anime_id=100000, k=2
     try:
         # Check if the input is empty or consists of only spaces
         if not anime_title or anime_title.isspace():
-            st.write("Enter something you neckbeard! There's no empty anime name.")
+            st.write(":red[Please enter a valid anime title.]")
             return
 
         anime_title = anime_title.strip().lower()
@@ -33,10 +33,15 @@ def get_item_recommendations(algo, algo_items, anime_title, anime_id=100000, k=2
                 return
 
         # If there are multiple matches, select the best one (the one with the shortest title)
+        # If there are multiple matches, select the best one (the one with the shortest title)
         best_match_index = matching_animes['title'].str.len().idxmin()
         best_match = matching_animes.loc[best_match_index]
-        st.write(":red[Assuming you meant: ]", best_match['title'])
+
+        if best_match['title'].lower() != anime_title:
+            st.markdown(f":red[Assuming you meant: '**{best_match['title']}**']")
+
         anime_id = best_match['anime_id']
+
 
         iid = algo_items.trainset.to_inner_iid(anime_id)
         neighbors = algo_items.get_neighbors(iid, k=k)
@@ -63,9 +68,10 @@ def get_item_recommendations(algo, algo_items, anime_title, anime_id=100000, k=2
 # Set up the Streamlit interface
 st.title('AniRecoSys')
 # st.write("""
-# Enter the title of an anime and press 'Enter' to get personalized recommendations.
+# Please enter an anime title in the input box below and hit 'Enter' on your keyboard.
+# You'll be presented with a list of recommended anime based on your input.
+# You can click on the title of any anime in the recommendations to go to its webpage.
 # """)
-
 
 anime_title = st.text_input('Please enter an anime title', help='Type the title of an anime and press Enter to get recommendations.')
 

@@ -56,10 +56,15 @@ def get_item_recommendations(algo, algo_items, anime_title, anime_id=100000, k=2
                 return
 
         # If there are multiple matches, select the best one (the one with the shortest title)
+        # If there are multiple matches, select the best one (the one with the shortest title)
         best_match_index = matching_animes['title'].str.len().idxmin()
         best_match = matching_animes.loc[best_match_index]
-        st.write(":red[Assuming you meant: ]", best_match['title'])
+
+        if best_match['title'].lower() != anime_title:
+            st.markdown(f":red[Assuming you meant: '**{best_match['title']}**']")
+
         anime_id = best_match['anime_id']
+
 
         iid = algo_items.trainset.to_inner_iid(anime_id)
         neighbors = algo_items.get_neighbors(iid, k=k)
