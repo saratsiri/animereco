@@ -29,13 +29,13 @@ def get_item_recommendations(algo, algo_items, anime_title, anime_id=100000, k=2
         if matching_animes.empty:
             matching_animes = AnimesDF[AnimesDF['title_english_lower'].str.contains(anime_title)]
             if matching_animes.empty:
-                st.write("No matching anime found. Please check your input.")
+                st.write(":red[No matching anime found. Please check your input.]")
                 return
 
         # If there are multiple matches, select the best one (the one with the shortest title)
         best_match_index = matching_animes['title'].str.len().idxmin()
         best_match = matching_animes.loc[best_match_index]
-        st.write("Assuming you meant: ", best_match['title'])
+        st.write(":red[Assuming you meant: ]", best_match['title'])
         anime_id = best_match['anime_id']
 
         iid = algo_items.trainset.to_inner_iid(anime_id)
@@ -58,17 +58,16 @@ def get_item_recommendations(algo, algo_items, anime_title, anime_id=100000, k=2
         st.markdown(table_md)
 
     except Exception as e:
-        st.write("No matching anime found. Please check your input.")
+        st.write(":red[No matching anime found. Please check your input.]")
 
 # Set up the Streamlit interface
-st.title('Weeaboo Wonderland')
-st.write("""
-Please enter an anime title in the input box below and hit 'Enter' on your keyboard.
-You'll be presented with a list of recommended anime based on your input.
-You can click on the title of any anime in the recommendations to go to its webpage.
-""")
+st.title('AniRecoSys')
+# st.write("""
+# Enter the title of an anime and press 'Enter' to get personalized recommendations.
+# """)
 
-anime_title = st.text_input('Please enter an anime title')
+
+anime_title = st.text_input('Please enter an anime title', help='Type the title of an anime and press Enter to get recommendations.')
 
 # Only run the recommendation function if the user has entered something
 if anime_title:
