@@ -13,10 +13,6 @@ with open(f"{os.getcwd()}/anime_recommender/trained_models/baseline_model.pickle
 with open(f"{os.getcwd()}/anime_recommender/trained_models/knn_model.pickle", 'rb') as f:
     loaded_knn_model = pickle.load(f)
 
-# Preprocessing step
-AnimesDF['title_lower'] = AnimesDF['title'].str.lower()
-AnimesDF['title_english_lower'] = AnimesDF['title_english'].str.lower()
-
 def get_item_recommendations(algo, algo_items, anime_title, anime_id=100000, k=20):
     try:
         # Check if the input is empty or consists of only spaces
