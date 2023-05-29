@@ -30,7 +30,7 @@ similarity_matrix = load('scores.npy')
 # animeID_to_name = load_anime()
 # ScoresDF_selected = load_score()
 
-url_2 = "https://drive.google.com/u/0/uc?id=1Q_s55ingwAC4_vzAoJ3knXUqgExGpWzg&export=download"
+url_2 = "https://drive.google.com/u/0/uc?id=1WpzKNboC-32uDsNSug99cY0j8VLS4Q2I&export=download"
 output_2 = "ScoresDF_selected.csv"
 gdown.download(url_2, output_2, quiet=False)
 ScoresDF_selected = pd.read_csv('ScoresDF_selected.csv')
@@ -42,7 +42,7 @@ gdown.download(url_3, output_3, quiet=False)
 AnimesDF = pd.read_csv('anime_cleaned.csv')
 animeID_to_name = AnimesDF.set_index('anime_id')['title'].to_dict()
 
-#@st.cache_data
+@st.cache_data
 def load_trainset():
     reader = Reader(rating_scale=(0, 10))
     scoredata = Dataset.load_from_df(ScoresDF_selected[['username', 'anime_id', 'my_score']], reader)
