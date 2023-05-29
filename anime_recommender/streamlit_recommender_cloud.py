@@ -40,7 +40,7 @@ def get_item_recommendations(algo, algo_items, anime_title, anime_id=100000, k=2
     try:
         # Check if the input is empty or consists of only spaces
         if not anime_title or anime_title.isspace():
-            st.write("Enter something you neckbeard! There's no empty anime name.")
+            st.write("Please enter a valid anime title.")
             return
 
         anime_title = anime_title.strip().lower()
@@ -84,7 +84,7 @@ def get_item_recommendations(algo, algo_items, anime_title, anime_id=100000, k=2
         st.write("No matching anime found. Please check your input.")
 
 # Set up the Streamlit interface
-st.title('Weeaboo Wonderland')
+st.title('AniRecoSys')
 st.write("""
 Please enter an anime title in the input box below and hit 'Enter' on your keyboard.
 You'll be presented with a list of recommended anime based on your input.
