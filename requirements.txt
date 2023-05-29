@@ -14,3 +14,4 @@ google-cloud-storage
 google-auth
 gcsfs
 git+https://github.com/streamlit/files-connection
+google-cloud-bigquery
