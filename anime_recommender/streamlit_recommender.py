@@ -13,29 +13,30 @@ with open(f"{os.getcwd()}/anime_recommender/trained_models/baseline_model.pickle
 with open(f"{os.getcwd()}/anime_recommender/trained_models/knn_model.pickle", 'rb') as f:
     loaded_knn_model = pickle.load(f)
 
-import re
-
 # Preprocessing step
 AnimesDF['title_lower'] = AnimesDF['title'].str.lower()
 AnimesDF['title_english_lower'] = AnimesDF['title_english'].str.lower()
 
 def get_item_recommendations(algo, algo_items, anime_title, anime_id=100000, k=20):
     try:
+        # Check if the input is empty or consists of only spaces
         if not anime_title or anime_title.isspace():
             st.write("Enter something you neckbeard! There's no empty anime name.")
             return
 
         anime_title = anime_title.strip().lower()
 
-        matching_animes = AnimesDF[AnimesDF['title'].str.lower().str.startswith(anime_title)]
+        # Check if the title contains the anime_title as a substring
+        matching_animes = AnimesDF[AnimesDF['title_lower'].str.contains(anime_title)]
 
+        # If no results, search by the English title
         if matching_animes.empty:
-            matching_animes = AnimesDF[AnimesDF['title_english'].str.lower().str.startswith(anime_title)]
+            matching_animes = AnimesDF[AnimesDF['title_english_lower'].str.contains(anime_title)]
+            if matching_animes.empty:
+                st.write("No matching anime found. Please check your input.")
+                return
 
-        if matching_animes.empty:
-            st.write("No matching anime found. Please check your input.")
-            return
-
+        # If there are multiple matches, select the best one (the one with the shortest title)
         best_match_index = matching_animes['title'].str.len().idxmin()
         best_match = matching_animes.loc[best_match_index]
         st.write("Assuming you meant: ", best_match['title'])
@@ -46,10 +47,13 @@ def get_item_recommendations(algo, algo_items, anime_title, anime_id=100000, k=2
         raw_neighbors = (algo.trainset.to_raw_iid(inner_id) for inner_id in neighbors)
 
         df = pd.DataFrame(raw_neighbors, columns = ['Anime_ID'])
-        df = df.merge(AnimesDF[['anime_id', 'title', 'genre', 'score']], left_on='Anime_ID', right_on='anime_id', how='left')
+        df = pd.merge(df, AnimesDF, left_on = 'Anime_ID', right_on = 'anime_id', how = 'left')
 
-        df["Title"] = "[" + df["title"] + "](https://myanimelist.net/anime/" + df['Anime_ID'].astype(str) + "/" + df['title'].str.replace(' ', '_') + ")"
+        df["Title"] = df.apply(lambda row: f"[{row['title']}](https://myanimelist.net/anime/{row['Anime_ID']}/{row['title'].replace(' ', '_')})", axis=1)
+        df["Genre"] = df["genre"]
+        df["Score"] = df["score"]
 
+        # Create markdown tables
         table_md = "| Title | Genre | Score |\n| --- | --- | --- |\n"
         for i, row in df[:10].iterrows():
             table_md += f"| {row['Title']} | {row['Genre']} | {row['Score']} |\n"
@@ -58,7 +62,8 @@ def get_item_recommendations(algo, algo_items, anime_title, anime_id=100000, k=2
         st.markdown(table_md)
 
     except Exception as e:
-        st.write("An error occurred during the processing. Please try again.")
+        st.write("No matching anime found. Please check your input.")
+
 # Set up the Streamlit interface
 st.title('Weeaboo Wonderland')
 st.write("""
