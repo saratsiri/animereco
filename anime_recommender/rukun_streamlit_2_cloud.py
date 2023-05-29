@@ -15,80 +15,38 @@ from google.cloud import storage
 from io import StringIO
 import json
 from google.oauth2.service_account import Credentials
+from st_files_connection import FilesConnection
 
 # load numpy array from npy file
 from numpy import load
+import gdown
 
 # Page configuration
 st.set_page_config(page_title='Anime Recommendation', layout='centered')
 
-# Parse the secrets to a dictionary
-creds_dict = json.loads(st.secrets["GOOGLE_APPLICATION_CREDENTIALS_JSON"])
+url_1 = "https://drive.google.com/u/0/uc?id=1Ws4NjZH0d5OiEor3hRbNziC0KeWi1Vjh&export=download"
+output_1 = "scores.npy"
+gdown.download(url_1, output_1, quiet=False)
+similarity_matrix = load('scores.npy')
 
-# Create a Credentials object from the dictionary
-creds = Credentials.from_service_account_info(creds_dict)
+#st.write(similarity_matrix.shape)
 
-# Instantiate a Google Cloud Storage client with the credentials
-storage_client = storage.Client(credentials=creds)
+# # Load the data using the respective functions
+# similarity_matrix = load_similarity_matrix()
+# animeID_to_name = load_anime()
+# ScoresDF_selected = load_score()
 
-
-@st.cache_data
-def load_similarity_matrix():
-    # Specify the bucket and file name for similarity matrix
-    bucket_name = "animerec"
-    file_name = "similarity_matrix_full.npy"
-
-    # Load the .npy file from Google Cloud Storage
-    similarity_blob = load_npy_from_gcs(bucket_name, file_name)
-    similarity_matrix = np.load(similarity_blob.download_as_bytes())
-    return similarity_matrix
-
-@st.cache_data
-def load_anime():
-    # Specify the bucket and file name for anime dataset
-    bucket_name = "animerec"
-    file_name = "anime_cleaned.csv"
-
-    # Load the CSV file from Google Cloud Storage
-    anime_blob = load_csv_from_gcs(bucket_name, file_name)
-    AnimesDF = pd.read_csv(anime_blob)
-    animeID_to_name = AnimesDF.set_index('anime_id')['title'].to_dict()
-    return animeID_to_name
-
-@st.cache_data
-def load_score():
-    # Specify the bucket and file name for scores dataset
-    bucket_name = "animerec"
-    file_name = "animelists_cleaned.csv"
-
-    # Load the CSV file from Google Cloud Storage
-    scores_blob = load_csv_from_gcs(bucket_name, file_name)
-    ScoresDF = pd.read_csv(scores_blob)
-    ScoresDF_selected = ScoresDF[ScoresDF["my_score"] > 0][["username", "anime_id", "my_score", "my_last_updated"]]
-    return ScoresDF_selected
-
-@st.cache_data
-def load_csv_from_gcs(bucket_name, file_name):
-    client = storage.Client()
-    bucket = client.get_bucket(bucket_name)
-    blob = bucket.blob(file_name)
-    csv_data = blob.download_as_text()
-    return pd.compat.StringIO(csv_data)
-
-@st.cache_data
-def load_npy_from_gcs(bucket_name, file_name):
-    client = storage.Client()
-    bucket = client.get_bucket(bucket_name)
-    blob = bucket.blob(file_name)
-    npy_data = np.load(blob.download_as_bytes())
-    return npy_data
-
-# Load the data using the respective functions
-similarity_matrix = load_similarity_matrix()
-animeID_to_name = load_anime()
-ScoresDF_selected = load_score()
+url_2 = "https://drive.google.com/u/0/uc?id=1Q_s55ingwAC4_vzAoJ3knXUqgExGpWzg&export=download"
+output_2 = "ScoresDF_selected.csv"
+gdown.download(url_2, output_2, quiet=False)
+ScoresDF_selected = pd.read_csv('ScoresDF_selected.csv')
 
 
+url_3 = "https://drive.google.com/u/0/uc?id=1cq_0KRmQzb2bnOr9yVG019DETOUimA88&export=download"
+output_3 = "anime_cleaned.csv"
+gdown.download(url_3, output_3, quiet=False)
+AnimesDF = pd.read_csv('anime_cleaned.csv')
+animeID_to_name = AnimesDF.set_index('anime_id')['title'].to_dict()
 
 @st.cache_data
 def load_trainset():
