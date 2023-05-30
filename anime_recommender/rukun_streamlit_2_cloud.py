@@ -18,10 +18,10 @@ import gdown
 # Page configuration
 st.set_page_config(page_title='Anime Recommendation', layout='centered')
 
-url_1 = "https://drive.google.com/u/0/uc?id=1Ws4NjZH0d5OiEor3hRbNziC0KeWi1Vjh&export=download"
-output_1 = "scores.npy"
+url_1 = "https://drive.google.com/u/0/uc?id=1wXHT9muJsy9ixe1SkEDCEII-POgRyKDD&export=download"
+output_1 = "similarity_matrix_small.npy"
 gdown.download(url_1, output_1, quiet=False)
-similarity_matrix = load('scores.npy')
+similarity_matrix = load('similarity_matrix_small.npy')
 
 #st.write(similarity_matrix.shape)
 
@@ -30,22 +30,22 @@ similarity_matrix = load('scores.npy')
 # animeID_to_name = load_anime()
 # ScoresDF_selected = load_score()
 
-url_2 = "https://drive.google.com/u/0/uc?id=1iGoI7i-YIf_5CHPYjkuks-F3kmTwrmDn&export=download"
-output_2 = "ScoresDF_selected_Hatui.csv"
-gdown.download(url_2, output_2, quiet=False)
-ScoresDF_selected = pd.read_csv('ScoresDF_selected_Hatui.csv')
+# url_2 = "https://drive.google.com/u/0/uc?id=1iGoI7i-YIf_5CHPYjkuks-F3kmTwrmDn&export=download"
+# output_2 = "ScoresDF_selected_Hatui.csv"
+# gdown.download(url_2, output_2, quiet=False)
+# ScoresDF_selected = pd.read_csv('ScoresDF_selected_Hatui.csv')
 
 
-url_3 = "https://drive.google.com/u/0/uc?id=1cq_0KRmQzb2bnOr9yVG019DETOUimA88&export=download"
-output_3 = "anime_cleaned.csv"
+url_3 = "https://drive.google.com/u/0/uc?id=17g29I2ECikZaFt4E6VKl1dTrzEIQwNfi&export=download"
+output_3 = "score_anime_selected.csv"
 gdown.download(url_3, output_3, quiet=False)
-AnimesDF = pd.read_csv('anime_cleaned.csv')
-animeID_to_name = AnimesDF.set_index('anime_id')['title'].to_dict()
+score_anime_selected = pd.read_csv('score_anime_selected.csv')
+animeID_to_name = score_anime_selected.set_index('anime_id')['title'].to_dict()
 
 @st.cache_data
 def load_trainset():
     reader = Reader(rating_scale=(0, 10))
-    scoredata = Dataset.load_from_df(ScoresDF_selected[['username', 'anime_id', 'my_score']], reader)
+    scoredata = Dataset.load_from_df(score_anime_selected[['username', 'anime_id', 'my_score']], reader)
     trainset = scoredata.build_full_trainset()
     return trainset
 trainset=load_trainset()
