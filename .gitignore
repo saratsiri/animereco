@@ -6,6 +6,9 @@ processed_data/
 .DS_Store
 .pickle
 .streamlit
+anime_recommender/for_model_output_only.ipynb
+anime_recommender/trained_models/
+notebooks/AnimesDF_clustered.csv
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
