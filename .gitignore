@@ -5,10 +5,7 @@ processed_data/
 .python-version
 .DS_Store
 .pickle
-AnimesDF
-anime_recommender/for_model_output_only.ipynb
-anime_recommender/trained_models/
-notebooks/AnimesDF_clustered.csv
+.streamlit
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
