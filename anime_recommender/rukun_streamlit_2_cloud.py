@@ -18,7 +18,7 @@ import gdown
 # Page configuration
 st.set_page_config(page_title='Anime Recommendation', layout='centered')
 
-url_1 = "https://drive.google.com/u/0/uc?id=1pPi_T1t7MBqDA5QjJ0zfvai804ZQfbbz&export=download"
+url_1 = "https://drive.google.com/uc?export=download&id=1a0o8xPkGaw_bmni20ZngNcHxL9PzuzAF"
 output_1 = "similarity_matrix_small.npy"
 gdown.download(url_1, output_1, quiet=False)
 similarity_matrix = load('similarity_matrix_small.npy')
@@ -36,7 +36,7 @@ similarity_matrix = load('similarity_matrix_small.npy')
 # ScoresDF_selected = pd.read_csv('ScoresDF_selected_Hatui.csv')
 
 
-url_3 = "https://drive.google.com/u/0/uc?id=1-jVJOq3ta_-3AwmUBk1-KHOu5Z0J0MGO&export=download"
+url_3 = "https://drive.google.com/uc?export=download&id=1ZLdSzbf0E-hYfiZcMlbguPqEXA2yekYj"
 output_3 = "score_anime_selected.csv"
 gdown.download(url_3, output_3, quiet=False)
 score_anime_selected = pd.read_csv('score_anime_selected.csv')
