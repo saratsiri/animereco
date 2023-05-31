@@ -13,6 +13,8 @@ with open(f"{os.getcwd()}/anime_recommender/trained_models/baseline_model.pickle
 with open(f"{os.getcwd()}/anime_recommender/trained_models/knn_model.pickle", 'rb') as f:
     loaded_knn_model = pickle.load(f)
 
+from fuzzywuzzy import process  # You may need to install this library using pip and #Levenshtein
+
 def get_item_recommendations(algo, algo_items, anime_title, anime_id=100000, k=20):
     try:
         # Check if the input is empty or consists of only spaces
@@ -22,22 +24,22 @@ def get_item_recommendations(algo, algo_items, anime_title, anime_id=100000, k=2
 
         anime_title = anime_title.strip().lower()
 
-        # Check if the title contains the anime_title as a substring
-        matching_animes = AnimesDF[AnimesDF['title_lower'].str.contains(anime_title)]
+        # Apply fuzzy matching to find the best match
+        best_match_title = process.extractOne(anime_title, AnimesDF['title_lower'])[0]
+        best_match = AnimesDF[AnimesDF['title_lower'] == best_match_title]
 
-        # If no results, search by the English title
-        if matching_animes.empty:
-            matching_animes = AnimesDF[AnimesDF['title_english_lower'].str.contains(anime_title)]
-            if matching_animes.empty:
-                st.write(":red[No matching anime found. Please check your input.]")
-                return
+        if best_match.empty:
+            st.write(":red[No matching anime found. Please check your input.]")
+            return
 
-        # If there are multiple matches, select the best one (the one with the shortest title)
-        best_match_index = matching_animes['title'].str.len().idxmin()
-        best_match = matching_animes.loc[best_match_index]
+        # If there are multiple matches, select the first one
+        best_match_index = best_match['title'].str.len().idxmin()
+        best_match = best_match.loc[best_match_index]
 
         if best_match['title'].lower() != anime_title:
             st.markdown(f":red[Assuming you meant: '**{best_match['title']}**']")
+
+        anime_id = best_match['anime_id']
 
         anime_id = best_match['anime_id']
 
