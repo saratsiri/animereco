@@ -32,7 +32,7 @@ def load_pickle_from_gcs(bucket_name, blob_name):
 bucket_name = "anime-reco"
 
 AnimesDF = load_csv_from_gcs(bucket_name, "anime_cleaned.csv")
-#loaded_model = load_pickle_from_gcs(bucket_name, "baseline_model.pickle")
+loaded_model = load_pickle_from_gcs(bucket_name, "baseline_model.pickle")
 loaded_knn_model = load_pickle_from_gcs(bucket_name, "knn_model.pickle")
 
 def get_item_recommendations(algo, algo_items, anime_title, anime_id=100000, k=20):
