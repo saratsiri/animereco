@@ -5,7 +5,6 @@ from google.cloud import storage
 from io import StringIO
 import json
 from google.oauth2.service_account import Credentials
-import re
 
 # Parse the secrets to a dictionary
 creds_dict = json.loads(st.secrets["GOOGLE_APPLICATION_CREDENTIALS_JSON"])
@@ -33,7 +32,7 @@ def load_pickle_from_gcs(bucket_name, blob_name):
 bucket_name = "anime-reco"
 
 AnimesDF = load_csv_from_gcs(bucket_name, "anime_cleaned.csv")
-loaded_model = load_pickle_from_gcs(bucket_name, "baseline_model.pickle")
+#loaded_model = load_pickle_from_gcs(bucket_name, "baseline_model.pickle")
 loaded_knn_model = load_pickle_from_gcs(bucket_name, "knn_model.pickle")
 
 def get_item_recommendations(algo, algo_items, anime_title, anime_id=100000, k=20):
@@ -73,15 +72,15 @@ def get_item_recommendations(algo, algo_items, anime_title, anime_id=100000, k=2
 
         df["Title"] = df.apply(lambda row: f"[{row['title']}](https://myanimelist.net/anime/{row['Anime_ID']}/{row['title'].replace(' ', '_')})", axis=1)
         df["Genre"] = df["genre"]
-        df["Score"] = df["score"]
 
         # Create markdown tables
-        table_md = "| Title | Genre | Score |\n| --- | --- | --- |\n"
+        table_md = "| Title | Genre |\n| --- | --- |\n"
         for i, row in df[:10].iterrows():
-            table_md += f"| {row['Title']} | {row['Genre']} | {row['Score']} |\n"
+            table_md += f"| {row['Title']} | {row['Genre']} |\n"
 
         st.markdown("## Top Recommendations")
         st.markdown(table_md)
+
 
     except Exception as e:
         st.write(":red[No matching anime found. Please check your input.]")
