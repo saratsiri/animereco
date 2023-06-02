@@ -86,7 +86,7 @@ def get_item_recommendations(algo, algo_items, anime_title, anime_id=100000, k=2
         st.write(":red[No matching anime found. Please check your input.]")
 
 # Set up the Streamlit interface
-st.title('AniRecoSys')
+st.title('AniMetrics')
 # st.write("""
 # Please enter an anime title in the input box below and hit 'Enter' on your keyboard.
 # You'll be presented with a list of recommended anime based on your input.
